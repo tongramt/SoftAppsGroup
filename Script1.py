@@ -8,55 +8,26 @@
 from tkinter import *
 # import filedialog module
 from tkinter import filedialog
+from copy import deepcopy
 import tkinter as tk
 # import pandas
 import pandas as pd
-
-import pyjstat
-
-global filename
-global URL
+from pyjstat import pyjstat
+import json
+import openpyxl
+filepath = None
 # Function for opening the
 # file explorer window
 def browseFiles():
-
-    filename = filedialog.askopenfilename(initialdir="/",
+    global filepath
+    filepath = filedialog.askopenfilename(initialdir="/",
                                           title="Select a File",
-                                          filetypes=(("csv Files", ".csv"), ))
-
-    # Change label contents
+                                          filetypes=(("csv Files", ".csv"), ("json Files", ".json")))
+    # Close the window once file is chosen
     window.destroy()
-
-def JSONURL():
-
-    window2 = Tk()
-    # Set window title
-    window2.title('Input URL for JSON or JSON-stat files')
-
-    # Set window size
-    window2.geometry("500x100")
-
-    # Set window background color
-    window2.config(background="white")
-
-    tk.Label(window2,
-             text="URL").grid(row=0)
-
-    e1 = tk.Entry(window2)
-    button_submit = Button(window2,
-                           text="Submit",
-                           command=exit)
-    button_exit = Button(window2,
-                           text="Exit",
-                           command=exit)
-    e1.grid(row=0, column=1)
-    button_submit.grid(row=1, column=1)
-    button_exit.grid(row=2, column=1)
-    tk.mainloop()
 
 # Create the root window
 window = Tk()
-
 # Set window title
 window.title('File Explorer')
 
@@ -76,10 +47,6 @@ button_explore = Button(window,
                         text="Browse Files",
                         command=browseFiles)
 
-button_JSON = Button(window,
-                        text="Enter JSON or JSON-stat URL",
-                        command=JSONURL)
-
 button_exit = Button(window,
                      text="Exit",
                      command=exit)
@@ -90,36 +57,43 @@ button_exit = Button(window,
 # specifying rows and columns
 label_file_explorer.pack()
 button_explore.pack()
-button_JSON.pack()
 button_exit.pack()
 
 # Let the window wait for any events
 window.mainloop()
-done = 0
-if filename is not None:
-    while done == 0:
-        try:
-            file = pd.read_csv(filename)
-            done = 1
-        except:
-            print('The file you have selected cannot be opened please try again')
+if filepath is not None:
+    # Reading in regular csv files
+    try:
+        dataframe = pd.read_csv(filepath)
+    except:
+        pass
+    # Reading in basic json files
+    try:
+        dataframe = pd.read_json(filepath, orient='index')
+    except:
+        pass
+    # reading in differently formatted json
+    try:
+        dataframe = pd.read_json(filepath, orient='columns')
+    except:
+        pass
+    # reading in json stat files
+    try:
+        file = open(filepath)
+        dataset = pyjstat.Dataset.read(file)
 
-if URL is not None:
-    while done == 0:
-        try:
-            file = pd.read_json(URL)
-            done = 1
-        except:
-            try:
-                # read from json-stat
-                dataset = pyjstat.Dataset.read(filename)
+        # write to dataframe
+        dataframe = dataset.write('dataframe')
+    except:
+        print('This dataset could not be opened')
+    # create a name for an excel file
+    datatoexcel = pd.ExcelWriter('exported_data.xlsx')
 
-                # write to dataframe
-                df = dataset.write('dataframe')
-                # read from dataframe
-                file = pyjstat.Dataset.read(df)
-                done =1
-            except:
-                print('The file you have selected cannot be opened please try again')
+    # write DataFrame to excel
+    dataframe.to_excel(datatoexcel)
 
-print(file.head())
+    # save the excel
+    datatoexcel.save()
+    print(dataframe.head(), '\n The Data has been written to an Excel File successfully.\n'
+          'The file is named "exported_data.xlxs"\n'
+          'The Data has', dataframe.shape[1], 'columns and', dataframe.shape[0], 'rows')
