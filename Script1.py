@@ -6,25 +6,24 @@
 # import all components
 # from the tkinter library
 from tkinter import *
-# import filedialog module
 from tkinter import filedialog
-from copy import deepcopy
-import tkinter as tk
-# import pandas
 import pandas as pd
 from pyjstat import pyjstat
 import json
-import openpyxl
-filepath = None
+
+
 # Function for opening the
 # file explorer window
-def browseFiles():
+def browse_files():
     global filepath
     filepath = filedialog.askopenfilename(initialdir="/",
                                           title="Select a File",
-                                          filetypes=(("csv Files", ".csv"), ("json Files", ".json")))
+                                          filetypes=(("csv Files", ".csv"), ("json Files", ".json"),))
     # Close the window once file is chosen
     window.destroy()
+
+
+filepath = None
 
 # Create the root window
 window = Tk()
@@ -45,7 +44,7 @@ label_file_explorer = Label(window,
 
 button_explore = Button(window,
                         text="Browse Files",
-                        command=browseFiles)
+                        command=browse_files)
 
 button_exit = Button(window,
                      text="Exit",
@@ -92,7 +91,7 @@ if filepath is not None:
         dataframe = dataset.write('dataframe')
     except:
         pass
-    try:# create a name for an excel file
+    try:  # create a name for an excel file
         datatoexcel = pd.ExcelWriter('exported_data.xlsx')
 
         # write DataFrame to excel
@@ -100,8 +99,9 @@ if filepath is not None:
 
         # save the excel
         datatoexcel.save()
-        print(dataframe.head(), '\n The Data has been written to an Excel File successfully.\n'
-              'The file is named "exported_data.xlxs"\n'
-              'The Data has', dataframe.shape[1], 'columns and', dataframe.shape[0], 'rows.')
+        print(dataframe.head(), '\nAbove are the first 5 rows of the Data.\n'
+                                'The Data has been written to an Excel File successfully.\n'
+                                'The file is named "exported_data.xlxs"\n'
+                                'The Data has', dataframe.shape[1], 'columns and', dataframe.shape[0], 'rows.')
     except:
         print('Sorry this dataset could not be opened')
