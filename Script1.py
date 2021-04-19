@@ -67,7 +67,14 @@ if filepath is not None:
         dataframe = pd.read_csv(filepath)
     except:
         pass
-    # Reading in basic json files
+    # Reading in json files
+    try:
+        f = open(filepath)
+        file = f.read()
+        data = json.loads(file)
+        dataframe = pd.json_normalize(data['results'])
+    except:
+        pass
     try:
         dataframe = pd.read_json(filepath, orient='index')
     except:
@@ -81,19 +88,20 @@ if filepath is not None:
     try:
         file = open(filepath)
         dataset = pyjstat.Dataset.read(file)
-
         # write to dataframe
         dataframe = dataset.write('dataframe')
     except:
-        print('This dataset could not be opened')
-    # create a name for an excel file
-    datatoexcel = pd.ExcelWriter('exported_data.xlsx')
+        pass
+    try:# create a name for an excel file
+        datatoexcel = pd.ExcelWriter('exported_data.xlsx')
 
-    # write DataFrame to excel
-    dataframe.to_excel(datatoexcel)
+        # write DataFrame to excel
+        dataframe.to_excel(datatoexcel)
 
-    # save the excel
-    datatoexcel.save()
-    print(dataframe.head(), '\n The Data has been written to an Excel File successfully.\n'
-          'The file is named "exported_data.xlxs"\n'
-          'The Data has', dataframe.shape[1], 'columns and', dataframe.shape[0], 'rows')
+        # save the excel
+        datatoexcel.save()
+        print(dataframe.head(), '\n The Data has been written to an Excel File successfully.\n'
+              'The file is named "exported_data.xlxs"\n'
+              'The Data has', dataframe.shape[1], 'columns and', dataframe.shape[0], 'rows.')
+    except:
+        print('Sorry this dataset could not be opened')
