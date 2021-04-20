@@ -16,18 +16,9 @@ girls = girls.write('dataframe')
 boys = boys.write('dataframe')
 birth_rates = birth_rates.write('dataframe')
 
-gender_headers = ['Statistic', 'Year', 'Names', 'value']
-rates_headers = ['Statistic', 'Year', 'Group', 'Occupation', 'value']
-
-girls.columns = gender_headers
-boys.columns = gender_headers
-birth_rates.columns = rates_headers
-girls.set_index('Years', inplace=True)
-boys.set_index('Years', inplace=True)
-birth_rates.set_index('Years', inplace=True)
-both_genders = pd.merge(girls, boys, on='Year')
-
-print(both_genders.head())
+both_genders = pd.concat([girls, boys])
+full_data = pd.concat([both_genders, birth_rates])
+print(full_data.head())
 
 
 
