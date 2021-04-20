@@ -23,14 +23,23 @@ income = income[income.Year.between(2012, 2021)]
 birth['Year'] = pd.to_numeric(birth['Year'])
 birth = birth[birth.Year.between(2012, 2021)]
 
-marriage = marriage.pivot(index=None, columns='Statistic', values='value').\
-    apply(lambda x: pd.Series(x.dropna().to_numpy()))
-income = income.pivot(index=None, columns='Statistic', values='value').\
-    apply(lambda x: pd.Series(x.dropna().to_numpy()))
-birth = birth.pivot(index=None, columns='Age Group of Mother', values='value').\
-    apply(lambda x: pd.Series(x.dropna().to_numpy()))
+marriage = marriage.rename(columns = {'Region of Cermony': 'Region'}, inplace = False)
 
-print(birth.head(), '\n', marriage.head(), '\n', income.head())
+marriage = marriage.pivot(index=["Year", 'Region'], columns="Statistic", values="value")
+birth = birth.pivot(index=["Year", 'Region'], columns="Age Group of Mother", values="value")
+income = income.pivot(index=["Year", 'Region'], columns="Statistic", values="value")
+
+b_m_data = pd.merge(marriage, birth, how='outer', on=['Year', 'Region'])
+full_data = pd.merge(b_m_data, income, how='outer', on=['Year', 'Region'])
+
+datatoexcel = pd.ExcelWriter('full_data.xlsx')
+# write DataFrame to excel
+full_data.to_excel(datatoexcel)
+
+# save the excel
+datatoexcel.save()
+
+
 #
 # # Source for code: https://dash.plotly.com/layout
 # #  Need to install dash and plotly
