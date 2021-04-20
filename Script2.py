@@ -1,7 +1,9 @@
 # Code for part 1: Script 2
 import pandas as pd
 from pyjstat import pyjstat
+import openpyxl
 
+# the URLs of the json-stat files to be used
 marriage_URL = 'https://ws.cso.ie/public/api.restful/PxStat.Data.Cube_API.ReadDataset/VSA41/JSON-stat/1.0/'
 income_URL = 'https://ws.cso.ie/public/api.restful/PxStat.Data.Cube_API.ReadDataset/SIA51/JSON-stat/1.0/'
 birth_URL = 'https://ws.cso.ie/public/api.restful/PxStat.Data.Cube_API.ReadDataset/VSA15/JSON-stat/1.0/'
@@ -16,6 +18,7 @@ marriage = marriage.write('dataframe')
 income = income.write('dataframe')
 birth = birth.write('dataframe')
 
+# limiting data to common years for all datasets
 marriage['Year'] = pd.to_numeric(marriage['Year'])
 marriage = marriage[marriage.Year.between(2012, 2021)]
 income['Year'] = pd.to_numeric(income['Year'])
@@ -23,12 +26,15 @@ income = income[income.Year.between(2012, 2021)]
 birth['Year'] = pd.to_numeric(birth['Year'])
 birth = birth[birth.Year.between(2012, 2021)]
 
+# Changing column name for marriage to match with birth and income
 marriage = marriage.rename(columns = {'Region of Cermony': 'Region'}, inplace = False)
 
+# Reformatting the data to have individual statistics as columns
 marriage = marriage.pivot(index=["Year", 'Region'], columns="Statistic", values="value")
 birth = birth.pivot(index=["Year", 'Region'], columns="Age Group of Mother", values="value")
 income = income.pivot(index=["Year", 'Region'], columns="Statistic", values="value")
 
+#  combining the datasets
 b_m_data = pd.merge(marriage, birth, how='outer', on=['Year', 'Region'])
 full_data = pd.merge(b_m_data, income, how='outer', on=['Year', 'Region'])
 
