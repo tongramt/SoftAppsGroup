@@ -39,8 +39,6 @@ full_data.to_excel(datatoexcel)
 # save the excel
 datatoexcel.save()
 
-
-#
 # # Source for code: https://dash.plotly.com/layout
 # #  Need to install dash and plotly
 # # visit http://127.0.0.1:8050/ in your web browser.
@@ -50,15 +48,15 @@ datatoexcel.save()
 # import dash_html_components as html
 # import plotly.express as px
 #
-# external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
+external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 #
-# app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
+app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
 #
 # # assume you have a "long-form" data frame
 # # see https://plotly.com/python/px-arguments/ for more options
-# df = full_data
+df = full_data
 #
-# fig = px.bar(df, x="Names", y="value", barmode="group")
+fig = px.bar(df, x="Names", y="value", barmode="group")
 #
 # app.layout = html.Div(children=[
 #     html.H1(children='My First Dash'),
