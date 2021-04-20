@@ -23,7 +23,14 @@ income = income[income.Year.between(2012, 2021)]
 birth['Year'] = pd.to_numeric(birth['Year'])
 birth = birth[birth.Year.between(2012, 2021)]
 
-print()
+marriage = marriage.pivot(index=None, columns='Statistic', values='value').\
+    apply(lambda x: pd.Series(x.dropna().to_numpy()))
+income = income.pivot(index=None, columns='Statistic', values='value').\
+    apply(lambda x: pd.Series(x.dropna().to_numpy()))
+birth = birth.pivot(index=None, columns='Age Group of Mother', values='value').\
+    apply(lambda x: pd.Series(x.dropna().to_numpy()))
+
+print(birth.head(), '\n', marriage.head(), '\n', income.head())
 #
 # # Source for code: https://dash.plotly.com/layout
 # #  Need to install dash and plotly
