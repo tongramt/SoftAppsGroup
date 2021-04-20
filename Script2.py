@@ -1,14 +1,28 @@
 # Code for part 1: Script 2
 import urllib3
 import pandas as pd
-import pyjstat from pyjstat
+from pyjstat import pyjstat
 
-EXAMPLE_URL = 'http://json-stat.org/samples/galicia.json'
+girls_URL = 'https://ws.cso.ie/public/api.restful/PxStat.Data.Cube_API.ReadDataset/VSA60/JSON-stat/1.0/'
+boys_URL = 'https://ws.cso.ie/public/api.restful/PxStat.Data.Cube_API.ReadDataset/VSA50/JSON-stat/1.0/'
+birth_rates_URL = 'https://ws.cso.ie/public/api.restful/PxStat.Data.Cube_API.ReadDataset/VSB14/JSON-stat/1.0/'
 
 # read from json-stat
-dataset = pyjstat.Dataset.read(EXAMPLE_URL)
+girls = pyjstat.Dataset.read(girls_URL)
+boys = pyjstat.Dataset.read(boys_URL)
+birth_rates = pyjstat.Dataset.read(birth_rates_URL)
 
 # write to dataframe
-df = dataset.write('dataframe')
-print(df)
+girls = girls.write('dataframe')
+boys = boys.write('dataframe')
+birth_rates = birth_rates.write('dataframe')
+
+girls.set_index('Years', inplace=True)
+boys.set_index('Years', inplace=True)
+birth_rates.set_index('Years', inplace=True)
+both_genders = pd.merge(girls, boys, on='Year')
+print(both_genders.head())
+
+
+
 
