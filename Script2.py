@@ -38,66 +38,22 @@ marriage = marriage.rename(columns = {'Region of Cermony': 'Region'}, inplace = 
 # Reformatting the data to have individual statistics as columns
 marriage = marriage.pivot(index=["Year", 'Region'], columns="Statistic", values="value")
 birth = birth.pivot(index=["Year", 'Region'], columns="Age Group of Mother", values="value")
+birth = birth.add_prefix('New Mothers Aged ')
 income = income.pivot(index=["Year", 'Region'], columns="Statistic", values="value")
 
 #  combining the datasets
 b_m_data = pd.merge(marriage, birth, how='outer', on=['Year', 'Region'])
 full_data = pd.merge(b_m_data, income, how='outer', on=['Year', 'Region'])
 
-# print(full_data[full_data.index.get_level_values('Year').isin([2013])].columns)
+datatoexcel = pd.ExcelWriter('full_data.xlsx')
+# write DataFrame to excel
+full_data.to_excel(datatoexcel)
 
-# dff = pd.DataFrame(full_data[full_data.index.get_level_values('Region').isin(['Dublin'])]['Average Age of Bride'])
-# print(dff.reset_index()['Average Age of Bride'])
+# save the excel
+datatoexcel.save()
 
-
-
-
-
-# print(full_data.index.get_level_values('Year').unique().values)
-
-
-
-
-
-#print(full_data.index.get_level_values('Region').unique())
-#print(full_data[full_data.index.isin(['Dublin'], level=1)]['Average Age of Bride'])
-# print(full_data[full_data.index.get_level_values('Region').isin(['Dublin', 'Midland'])])
-# datatoexcel = pd.ExcelWriter('full_data.xlsx')
-# # write DataFrame to excel
-# full_data.to_excel(datatoexcel)
-#
-# # save the excel
-# datatoexcel.save()
-#
 #Create the Dash app
 app = dash.Dash()
-
-# app.layout = html.Div(children=[
-#     html.H1(children='Marriage, Income and Birth Statistics Dashboard'),
-#     dcc.Dropdown(id='year-dropdown',
-#                  options=[{'label': i, 'value': i}
-#                           for i in full_data.index.get_level_values('Year').unique()],
-#                  value='2018'),
-#     dcc.Graph(id='stats-graph')
-# ])
-#
-# #Set up the callback function
-# @app.callback(
-#     Output(component_id='stats-graph', component_property='figure'),
-#     Input(component_id='year-dropdown', component_property='value')
-# )
-# def update_graph(selected_year):
-#     filtered_year = full_data[full_data.index.get_level_values('Year').isin([selected_year])]
-#     line_fig = px.bar(filtered_year,
-#                        x=full_data.index.get_level_values('Region').unique(),
-#                        y=
-#                        full_data[full_data.index.get_level_values('Year').isin([selected_year])],
-#                        title=f'Stats in {selected_year}')
-#     return line_fig
-#
-# # Run local server
-# if __name__ == '__main__':
-#     app.run_server(debug=True)
 
 app.layout = html.Div(children=[
 
@@ -122,7 +78,8 @@ app.layout = html.Div(children=[
 
             ])
         ]),
-    dcc.Graph(id='stats-graph')
+        dcc.Graph(id='stats-graph'),
+        dcc.Graph(id='bar-graph')
     ])
 
 
@@ -140,17 +97,37 @@ def get_statistic(region_unit):
     Input(component_id='statistic', component_property='value')
 )
 def update_graph(region, statistic):
+
     dff = full_data[full_data.index.get_level_values('Region').isin([region])][statistic]
     line_fig = px.line(dff,
                        x= dff.reset_index()['Year'],
                        y= dff.reset_index()[statistic],
-                       title=f'{statistic} in {region}'
+                       title=f'{statistic} in {region} by Year'
                        )
+
     line_fig.update_xaxes(title_text = "Year")
 
     line_fig.update_yaxes(title_text = statistic)
 
     return line_fig
+
+@app.callback(
+    Output(component_id='bar-graph', component_property='figure'),
+    Input(component_id='statistic', component_property='value')
+)
+def update_pie(statistic):
+
+    dff = full_data.xs(2019)
+    bar_fig = px.bar(dff, x=full_data.index.get_level_values('Region').unique(), y=dff[statistic],
+                     title=f'{statistic} by Region in 2019')
+
+    bar_fig.update_xaxes(title_text="Region")
+
+    bar_fig.update_yaxes(title_text=statistic)
+
+    for data in bar_fig.data:
+        data["width"] = 0.4  # Change this value for bar widths
+    return bar_fig
 
 if __name__ == '__main__':
     app.run_server(debug=True)
