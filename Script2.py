@@ -115,7 +115,7 @@ def update_graph(region, statistic):
     Output(component_id='bar-graph', component_property='figure'),
     Input(component_id='statistic', component_property='value')
 )
-def update_pie(statistic):
+def update_bar(statistic):
 
     dff = full_data.xs(2019)
     bar_fig = px.bar(dff, x=full_data.index.get_level_values('Region').unique(), y=dff[statistic],
